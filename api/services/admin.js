@@ -26,7 +26,7 @@ class AdminService {
   async getAdmin(params) {
     try {
       let { username } = params;
-      let admin = await prisma.admins.findOne({
+      let admin = await prisma.admins.findUnique({
         where: {
           username: username,
         },

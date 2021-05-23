@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# NFT-MarketPlace-BackEnd
-This is a demo implementation for openSea MarketPlace(Backend Part)
-=======
 # marketplace-api
 
 This repository contains api to retrieve marketplace data for matic network marketplace
@@ -40,4 +36,3 @@ $ npm run migrate-save
 #### database
 
 Refer to [readme.md](./prisma/README.md)
->>>>>>> origin/ERC1155
