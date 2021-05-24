@@ -12,11 +12,11 @@ model bids {
   created   DateTime @default(now())
   id        Int      @id @default(autoincrement())
   orders_id Int
-  price     String
-  signature String
   status    Int?     @default(0)
   updated   DateTime @default(now())
   users_id  Int
+  signature String
+  price     String
   orders    orders   @relation(fields: [orders_id], references: [id])
   users     users    @relation(fields: [users_id], references: [id])
 }
@@ -27,47 +27,45 @@ model categories {
   description         String?
   id                  Int                   @id @default(autoincrement())
   img_url             String?
-  name                String                @unique
-  name_lowercase      String                @default("")
   updated             DateTime              @default(now())
   url                 String?
-  type                String?               @default("ERC721")
-  tokenURI            String?
+  name                String                @unique
   isOpenseaCompatible Boolean?              @default(false)
+  tokenURI            String?
   isMetaTx            Boolean?              @default(false)
+  type                String?               @default("ERC721")
+  disabled            Boolean?              @default(false)
+  name_lowercase      String                @default("")
+  assetmigrate        assetmigrate[]
   categoriesaddresses categoriesaddresses[]
   orders              orders[]
-  assetmigrate        assetmigrate[]
-  disabled            Boolean?              @default(false)
   tokens              tokens[]
 }
 
 model categoriesaddresses {
   active           Boolean?   @default(true)
   address          String
-  ethereum_address String
   categories_id    Int
   chain_id         String
   created          DateTime   @default(now())
-  id               Int        @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   updated          DateTime   @default(now())
+  ethereum_address String
   categories       categories @relation(fields: [categories_id], references: [id])
-
-  @@id([address, chain_id])
 }
 
 model tokens {
-  token_id       String
+  attributes     String?
   categories_id  Int
-  image_url      String?
+  created        DateTime   @default(now())
   description    String?
   external_url   String?
-  name           String?
-  name_lowercase String?    @default("")
-  attributes     String?
-  created        DateTime   @default(now())
   id             Int        @default(autoincrement())
+  image_url      String?
+  name           String?
+  token_id       String
   updated        DateTime   @default(now())
+  name_lowercase String?    @default("")
   categories     categories @relation(fields: [categories_id], references: [id])
   orders         orders[]
 
@@ -79,13 +77,13 @@ model erc20tokens {
   created              DateTime               @default(now())
   decimal              Int
   id                   Int                    @id @default(autoincrement())
+  updated              DateTime               @default(now())
   name                 String
   symbol               String                 @unique
+  market_price         String?
   isMetaTx             Boolean                @default(true)
-  updated              DateTime               @default(now())
   erc20tokensaddresses erc20tokensaddresses[]
   orders               orders[]
-  market_price         String?
 }
 
 model erc20tokensaddresses {
@@ -102,49 +100,49 @@ model erc20tokensaddresses {
 model favourites {
   created  DateTime @default(now())
   id       Int      @id @default(autoincrement())
-  order_id Int
   updated  DateTime @default(now())
   users_id Int
+  order_id Int
   orders   orders   @relation(fields: [order_id], references: [id])
   users    users    @relation(fields: [users_id], references: [id])
 }
 
 model orders {
   active             Boolean?        @default(true)
-  chain_id           String
   categories_id      Int
   created            DateTime        @default(now())
   erc20tokens_id     Int
   expiry_date        DateTime?
   id                 Int             @id @default(autoincrement())
   maker_address      Int?
-  min_price          String
-  price              String
-  price_per_unit     String?
-  min_price_per_unit String?
-  quantity           String?
-  token_type         String?         @default("ERC721")
-  usd_price          Float?
   signature          String?
   status             Int?            @default(0)
   taker_address      Int?
-  taker_amount       String?
-  maker_amount       String?
   tokens_id          String
   txhash             String?
   type               String
-  buyer              Int?
-  seller             Int?
   updated            DateTime        @default(now())
   views              Int?            @default(0)
-  categories         categories      @relation(fields: [categories_id], references: [id])
-  tokens             tokens          @relation(fields: [tokens_id, categories_id], references: [token_id, categories_id])
-  erc20tokens        erc20tokens     @relation(fields: [erc20tokens_id], references: [id])
+  chain_id           String
+  buyer              Int?
+  seller             Int?
+  maker_amount       String?
+  min_price          String
+  price              String
+  taker_amount       String?
+  usd_price          Decimal?
+  price_per_unit     String?
+  quantity           String?
+  token_type         String?         @default("ERC721")
+  min_price_per_unit String?
   buyer_users        users?          @relation("buyer_orders", fields: [buyer], references: [id])
+  categories         categories      @relation(fields: [categories_id], references: [id])
+  erc20tokens        erc20tokens     @relation(fields: [erc20tokens_id], references: [id])
   seller_users       users?          @relation("seller_orders", fields: [seller], references: [id])
+  tokens             tokens          @relation(fields: [tokens_id, categories_id], references: [token_id, categories_id])
   bids               bids[]
-  notifications      notifications[]
   favourites         favourites[]
+  notifications      notifications[]
 }
 
 model users {
@@ -153,50 +151,50 @@ model users {
   created       DateTime        @default(now())
   id            Int             @id @default(autoincrement())
   updated       DateTime        @default(now())
+  assetmigrate  assetmigrate[]
   bids          bids[]
   favourites    favourites[]
+  notifications notifications[]
   buyer_orders  orders[]        @relation("buyer_orders")
   seller_orders orders[]        @relation("seller_orders")
-  notifications notifications[]
-  assetmigrate  assetmigrate[]
 }
 
 model admins {
   active   Boolean? @default(true)
-  username String   @unique
-  password String
   created  DateTime @default(now())
   id       Int      @id @default(autoincrement())
+  password String
   updated  DateTime @default(now())
+  username String   @unique
 }
 
 model notifications {
-  read     Boolean  @default(false)
   active   Boolean  @default(true)
   created  DateTime @default(now())
   id       Int      @id @default(autoincrement())
   message  String
-  type     String   @default("ORDER")
-  updated  DateTime @default(now())
   order_id Int
+  read     Boolean  @default(false)
+  updated  DateTime @default(now())
+  usersId  Int
+  type     String   @default("ORDER")
   orders   orders   @relation(fields: [order_id], references: [id])
   users    users    @relation(fields: [usersId], references: [id])
-  usersId  Int
 }
 
 model assetmigrate {
+  categories_id Int
   created       DateTime   @default(now())
-  id            Int        @id @default(autoincrement())
-  updated       DateTime   @default(now())
-  type          String
-  txhash        String     @unique
   exit_txhash   String?    @unique
+  id            Int        @id @default(autoincrement())
+  status        Int?       @default(0)
+  token_array   String[]
+  txhash        String     @unique
+  type          String
+  updated       DateTime   @default(now())
+  users_id      Int
   block_number  String?
   message       String?
-  token_array   String[]
-  users_id      Int
-  categories_id Int
-  status        Int?       @default(0)
-  users         users      @relation(fields: [users_id], references: [id])
   categories    categories @relation(fields: [categories_id], references: [id])
+  users         users      @relation(fields: [users_id], references: [id])
 }
