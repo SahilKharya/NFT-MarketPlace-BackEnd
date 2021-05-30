@@ -54,6 +54,8 @@ router.post(
   ],
   verifyToken,
   async (req, res) => {
+    console.log("req    ",req.body)
+    // console.log("req    ",req)
     try {
       const errors = validationResult(req);
 
@@ -80,9 +82,10 @@ router.post(
         quantity,
         min_price_per_unit,
       } = req.body;
-
+      console.log("constants    ",constants)
       let categoryType =
         type === constants.ORDER_TYPES.FIXED ? maker_token : taker_token;
+        // console.log("categoryType    ",categoryType)
 
       let category = await categoryServiceInstance.getCategory({
         categoryId: categoryType,
@@ -100,6 +103,7 @@ router.post(
       let erc20token = await erc20TokenServiceInstance.getERC20Token({
         id: erc20Type,
       });
+      console.log("erc20token    ",erc20token)
 
       if (!erc20token) {
         return res
@@ -114,6 +118,7 @@ router.post(
         tokenId,
         categoryId: category.id,
       });
+      console.log("validOrder    ",validOrder)
 
       if (validOrder.active_order) {
         return res.status(constants.RESPONSE_STATUS_CODES.OK).json({
@@ -147,7 +152,7 @@ router.post(
               .json({ message: constants.MESSAGES.INPUT_VALIDATION_ERROR });
           }
           orderAdd = await orderServiceInstance.placeFixedOrder({
-            maker_address: req.userId,
+            maker_address: req.body.userId,
             maker_token,
             maker_token_id,
             price,
@@ -331,6 +336,7 @@ router.get(
       }
 
       let order = await orderServiceInstance.getOrder(req.params);
+      console.log("order    ",order)
       if (order) {
         let checkOwnerShip = false;
         let orderInvalid = false;

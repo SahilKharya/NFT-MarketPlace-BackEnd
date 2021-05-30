@@ -162,7 +162,7 @@ class TokenService {
         where: {
           token_id_categories_id: {
             token_id: token_id,
-            categories_id: category_id,
+            categories_id: parseInt(category_id),
           },
         },
       });

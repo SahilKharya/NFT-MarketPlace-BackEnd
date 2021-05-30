@@ -60,14 +60,15 @@ class CategoryService {
   }
 
   async getCategoryByAddress({ categoryAddress, chainId }) {
+  let { address } = categoryAddress;
     try {
       let category = await prisma.categoriesaddresses.findOne({
         where: {
           address_chain_id: {
             address: categoryAddress,
-            chain_id: chainId,
+            chain_id: chainId
           },
-        },
+        }
       });
 
       return category;

@@ -34,9 +34,9 @@ router.get(
           .json({ error: errors.array() });
       }
 
-      let { userId, chainId } = req.query;
-
+      let { userId, chainId } = req.body;
       let user = await userServiceInstance.getUser({ userId });
+      console.log("user   " , user);
 
       if (!user) {
         return res.status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST).json({
@@ -49,6 +49,7 @@ router.get(
         owner: user.address.toLowerCase(),
         userId,
       });
+      console.log("tokens   " , tokens);
 
       if (tokens.nft_array.length > 0) {
         return res.status(constants.RESPONSE_STATUS_CODES.OK).json({
@@ -71,6 +72,82 @@ router.get(
   }
 );
 
+
+/**
+ *  Adds a new token or updates existing token
+ *  @params token_id type: String
+ *  @params category_id type: Int
+ *  @params description type: String
+ *  @params image_url type: String
+ *  @params external_url type: String
+ *  @params name type: String
+ *  @params attributes type: String
+ */
+
+router.post(
+  "/",
+  check("token_id", "A valid id is required").exists(),
+  check("category_id", "A valid id is required").exists(),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        return res
+          .status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST)
+          .json({ error: errors.array() });
+      }
+
+      let { token_id, category_id } = req.body;
+      console.log(res.body)
+      console.log(req.body)
+
+      let category = await categoryServiceInstance.getCategory({
+        categoryId: category_id,
+      });
+
+      if (!category) {
+        return res
+          .status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST)
+          .json({ message: constants.MESSAGES.INPUT_VALIDATION_ERROR });
+      }
+
+      let tokenDetail = await tokenServiceInstance.getToken(req.body);
+
+      if (!tokenDetail) {
+        let token = await tokenServiceInstance.createToken(req.body);
+        if (token) {
+          return res
+            .status(constants.RESPONSE_STATUS_CODES.OK)
+            .json({ message: constants.RESPONSE_STATUS.SUCCESS, data: token });
+        } else {
+          return res
+            .status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST)
+            .json({ message: constants.RESPONSE_STATUS.FAILURE });
+        }
+      } else {
+        let token = await tokenServiceInstance.updateToken(req.body);
+        if (token) {
+          return res
+            .status(constants.RESPONSE_STATUS_CODES.OK)
+            .json({ message: constants.RESPONSE_STATUS.SUCCESS, data: token });
+        } else {
+          return res
+            .status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST)
+            .json({ message: constants.RESPONSE_STATUS.FAILURE });
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(constants.RESPONSE_STATUS_CODES.INTERNAL_SERVER_ERROR)
+        .json({ message: constants.MESSAGES.INTERNAL_SERVER_ERROR });
+    }
+  }
+);
+
+
+
 /**
  *
  *  @params token_id type: String
@@ -85,8 +162,8 @@ router.get(
   check("chain_id", "A valid id is required").exists(),
   async (req, res) => {
     try {
-      let query = req.query;
-
+      let query = req.body;
+      console.log("res1    ",req.body)
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
@@ -94,11 +171,14 @@ router.get(
           .status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST)
           .json({ error: errors.array() });
       }
+      console.log("13    ",query.category_address)
+      console.log("1333    ",query.chain_id)
 
       let categoryDetail = await categoryServiceInstance.getCategoryByAddress({
         categoryAddress: helper.toChecksumAddress(query.category_address),
         chainId: query.chain_id,
       });
+      console.log("categoryDetail    ",categoryDetail)
 
       if (!categoryDetail) {
         return res
@@ -108,6 +188,7 @@ router.get(
         let category = await categoryServiceInstance.getCategory({
           categoryId: categoryDetail.categories_id,
         });
+        console.log("get category    ",category)
 
         let token = await tokenServiceInstance.getToken({
           token_id: query.token_id,
@@ -118,23 +199,33 @@ router.get(
           helper.toChecksumAddress(query.category_address),
           query.token_id
         );
+        console.log("tokenMetadata   ",tokenMetadata)
 
         let metadata;
         if (tokenMetadata && tokenMetadata.metadata && tokenMetadata.metadata !== "{}") {
+          console.log("if   token   ")
           metadata = JSON.parse(tokenMetadata.metadata);
         } else {
           if (category.tokenURI) {
+          console.log("else if   token   ", category)
+
             metadata = await helper.fetchMetadataFromTokenURI(
               category.tokenURI + query.token_id
             );
           } else {
+          console.log("else   token   ", category)
+
             if (tokenMetadata.token_uri) {
+          console.log("else  if 2 token   ")
+
               metadata = await helper.fetchMetadataFromTokenURI(
                 tokenMetadata.token_uri
               );
             }
           }
         }
+        console.log("token   ",token)
+        console.log("metadata   ",metadata)
 
         if (!token) {
           token = await tokenServiceInstance.createToken({
@@ -197,6 +288,7 @@ router.get(
         }
       }
     } catch (err) {
+      console.log("new errror");
       console.log(err);
       return res
         .status(constants.RESPONSE_STATUS_CODES.INTERNAL_SERVER_ERROR)

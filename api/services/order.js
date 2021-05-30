@@ -29,7 +29,7 @@ class OrderService {
         data: {
           seller_users: { connect: { id: parseInt(maker_address) } },
           categories: { connect: { id: parseInt(maker_token) } },
-          maker_address: maker_address,
+          maker_address: parseInt(maker_address),
           tokens: {
             connect: {
               token_id_categories_id: {
