@@ -54,8 +54,6 @@ router.post(
   ],
   verifyToken,
   async (req, res) => {
-    console.log("req    ",req.body)
-    // console.log("req    ",req)
     try {
       const errors = validationResult(req);
 
@@ -152,7 +150,7 @@ router.post(
               .json({ message: constants.MESSAGES.INPUT_VALIDATION_ERROR });
           }
           orderAdd = await orderServiceInstance.placeFixedOrder({
-            maker_address: req.body.userId,
+            maker_address: req.userId,
             maker_token,
             maker_token_id,
             price,

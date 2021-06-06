@@ -22,13 +22,15 @@ class TokenService {
         let nft_array = [];
         let balances = {};
 
-        for (const data in tokenIdArray) {
+        for (let data in tokenIdArray) {
           let categoryDetail = await categoryServiceInstance.getCategoryByAddress(
             {
               categoryAddress: helper.toChecksumAddress(data),
               chainId: chainId,
             }
           );
+          console.log("categoryDetail   ", categoryDetail);
+          // dataString = JSON.stringify(data).slice(1, -1);
 
           if (categoryDetail) {
             let category = await categoryServiceInstance.getCategory({
@@ -36,13 +38,19 @@ class TokenService {
             });
 
             let token_array = [];
+            let token = '';
+            let metadata = '';
             for (const nft of tokenIdArray[data].tokens) {
-              let token = await this.getToken({
-                token_id: nft.id,
-                category_id: category.id,
-              });
 
-              let metadata = JSON.parse(nft.metadata);
+              if (nft.id >= 10) {
+                token = await this.getToken({
+                  token_id: nft.id,
+                  category_id: category.id,
+                });
+                console.log("nft token   ", token);
+
+                metadata = JSON.parse(nft.metadata);
+                console.log("nft metadata   ", metadata);
 
               if (!metadata) {
                 if (category.tokenURI) {
@@ -104,6 +112,7 @@ class TokenService {
                 ...orderDetail,
               });
             }
+            }
 
             if (token_array) {
               nft_array.push(...token_array);
@@ -162,7 +171,7 @@ class TokenService {
         where: {
           token_id_categories_id: {
             token_id: token_id,
-            categories_id: parseInt(category_id),
+            categories_id: category_id,
           },
         },
       });

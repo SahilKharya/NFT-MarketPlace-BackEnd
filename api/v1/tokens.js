@@ -33,8 +33,8 @@ router.get(
           .status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST)
           .json({ error: errors.array() });
       }
-
-      let { userId, chainId } = req.body;
+      console.log("req.query   " , req.query);
+      let { userId, chainId } = req.query;
       let user = await userServiceInstance.getUser({ userId });
       console.log("user   " , user);
 
@@ -171,8 +171,7 @@ router.get(
           .status(constants.RESPONSE_STATUS_CODES.BAD_REQUEST)
           .json({ error: errors.array() });
       }
-      console.log("13    ",query.category_address)
-      console.log("1333    ",query.chain_id)
+      console.log("13    ",query)
 
       let categoryDetail = await categoryServiceInstance.getCategoryByAddress({
         categoryAddress: helper.toChecksumAddress(query.category_address),
