@@ -15,7 +15,7 @@ function getSignTypedData({ owner }) {
       Test: [{ name: "owner", type: "string" }],
     },
     domain: {
-      name: "Opensea on Matic",
+      name: "Tech Mahindra on Matic",
       host: "",
       version: "1",
       verifyingContract: "0x0",
